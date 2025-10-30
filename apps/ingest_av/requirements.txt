@@ -1,0 +1,7 @@
+fastapi==0.115.2
+uvicorn[standard]==0.31.1
+pydantic==2.9.2
+Google-Cloud-Storage==2.18.2
+# Google Speech-to-Text v2
+google-cloud-speech==2.27.0
+requests==2.32.3

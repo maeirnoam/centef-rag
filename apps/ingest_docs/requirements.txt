@@ -1,0 +1,7 @@
+fastapi==0.115.2
+uvicorn[standard]==0.31.1
+pydantic==2.9.2
+Google-Cloud-Storage==2.18.2
+pymupdf==1.24.9
+# Optional for DocAI layout
+google-cloud-documentai==2.25.0

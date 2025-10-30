@@ -1,0 +1,6 @@
+
+{"id":"doc-001_p1","title":"Sample PDF – p.1","uri":"gs://centef-rag-bucket/data/pdfs/sample.pdf","structData":{"text":"First page text here...","source_id":"doc-001","source_type":"pdf","page":1,"lang":"en","hash":"sha256-of-text","created_at":"2025-10-30T10:00:00Z"}}
+{"id":"doc-001_p2","title":"Sample PDF – p.2","uri":"gs://centef-rag-bucket/data/pdfs/sample.pdf","structData":{"text":"Second page text...","source_id":"doc-001","source_type":"pdf","page":2,"lang":"en","hash":"...","created_at":"2025-10-30T10:00:00Z"}}
+{"id":"aud-001_0.0_4.2","title":"Interview [0.0-4.2s]","uri":"gs://centef-rag-bucket/data/av/interview.mp3","structData":{"text":"Hello and welcome...","source_id":"aud-001","source_type":"audio","start_sec":0.0,"end_sec":4.2,"lang":"en","hash":"...","created_at":"2025-10-30T10:00:00Z"}}
+{"id":"aud-001_4.2_8.5","title":"Interview [4.2-8.5s]","uri":"gs://centef-rag-bucket/data/av/interview.mp3","structData":{"text":"Today we discuss...","source_id":"aud-001","source_type":"audio","start_sec":4.2,"end_sec":8.5,"lang":"en","hash":"...","created_at":"2025-10-30T10:00:00Z"}}
+{"id":"img-123","title":"Chart – Sales 2025","uri":"gs://centef-rag-bucket/data/images/chart.png","structData":{"text":"Bar chart showing quarterly sales growth...","source_id":"img-123","source_type":"image","lang":"en","hash":"...","created_at":"2025-10-30T10:00:00Z"}}
