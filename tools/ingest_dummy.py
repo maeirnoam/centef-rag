@@ -1,31 +1,34 @@
-# tools/ingest_dummy.py
-import os, time
+import os
+import json
 from google.cloud import storage
 
-# bucket that your datastore is watching
-BUCKET = os.getenv("CHUNKS_BUCKET", "centef-rag-chunks")   # name, not gs://...
+# name of the bucket (NO gs://)
+BUCKET = os.getenv("CHUNKS_BUCKET", "centef-rag-chunks")
 FOLDER = "docs"
 
 def main():
     client = storage.Client()
     bucket = client.bucket(BUCKET)
 
-    # this is the content we want to index
+    # this is the document as Discovery Engine wants it
     doc = {
         "id": "demo-pdf-1",
-        "content": "This is a demo document about sanctions, Hezbollah, and financial networks in Lebanon.",
         "structData": {
+            "text": "This is a demo document about sanctions, Hezbollah, and financial networks in Lebanon.",
             "source_id": "demo-pdf-1",
             "source_type": "pdf",
             "page": 1
         }
     }
 
-    jsonl = f"{doc}\n".replace("'", '"')  # quick+dirty: turn dict into json string
+    jsonl_line = json.dumps(doc, ensure_ascii=False)
 
     blob_name = f"{FOLDER}/demo-pdf-1.jsonl"
     blob = bucket.blob(blob_name)
-    blob.upload_from_string(jsonl, content_type="application/jsonl")
+    blob.upload_from_string(
+        jsonl_line + "\n",
+        content_type="application/json"
+    )
 
     print(f"wrote gs://{BUCKET}/{blob_name}")
 
