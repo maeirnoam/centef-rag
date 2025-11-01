@@ -1,23 +1,28 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 import os
+
 from google.cloud import discoveryengine_v1 as des
 from google.api_core.exceptions import GoogleAPICallError, PermissionDenied, NotFound
+from google.protobuf.json_format import MessageToDict
 
 app = FastAPI(title="CENTEF RAG Agent API")
 
 DISCOVERY_SERVING_CONFIG = os.getenv("DISCOVERY_SERVING_CONFIG")
+
 
 class ChatReq(BaseModel):
     question: str
     k: int = 8
     filter: str = ""
 
+
 @app.get("/debug/env")
 def debug_env():
     return {
         "DISCOVERY_SERVING_CONFIG": DISCOVERY_SERVING_CONFIG,
     }
+
 
 def vertex_search(query: str, k: int = 8, filter_expr: str = ""):
     if not DISCOVERY_SERVING_CONFIG:
@@ -33,39 +38,31 @@ def vertex_search(query: str, k: int = 8, filter_expr: str = ""):
 
     results = []
     for r in client.search(request=req).results:
-        d = r.document
+        # turn the whole document into a plain dict
+        doc_dict = MessageToDict(r.document._pb, preserving_proto_field_name=True)
 
-        # struct_data can be None, a google.protobuf.Struct, or a MapComposite
-        struct = d.struct_data
-        meta = {}
-
-        if struct:
-            # best-effort: treat it like a dict
-            try:
-                # MapComposite behaves like a dict
-                for key, value in struct.items():
-                    # value can be Value/Struct; try to get string_value / number_value
-                    if hasattr(value, "string_value"):
-                        meta[key] = value.string_value
-                    elif hasattr(value, "number_value"):
-                        meta[key] = value.number_value
-                    else:
-                        # fallback to plain Python
-                        meta[key] = value
-            except AttributeError:
-                # older style: struct.fields
-                if hasattr(struct, "fields"):
-                    for key, value in struct.fields.items():
-                        meta[key] = value.string_value
-
-        results.append({
-            "title": d.title,
-            "uri": d.uri,
-            "snippet": d.snippet,
-            "metadata": meta,
-        })
+        # typical shape:
+        # {
+        #   "id": "...",
+        #   "struct_data": { ... },
+        #   "content": { ... },
+        #   "title": "...",
+        #   "uri": "...",
+        #   ...
+        # }
+        struct_data = doc_dict.get("struct_data", {})
+        results.append(
+            {
+                "title": doc_dict.get("title", ""),
+                "uri": doc_dict.get("uri", ""),
+                "snippet": doc_dict.get("snippet", ""),
+                "metadata": struct_data,
+                "raw": doc_dict,  # keep for debugging; remove later
+            }
+        )
 
     return results
+
 
 @app.post("/chat")
 def chat(req: ChatReq):
