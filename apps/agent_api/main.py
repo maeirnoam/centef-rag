@@ -30,33 +30,47 @@ def vertex_search(query: str, k: int = 8, filter_expr: str = ""):
         page_size=k,
         filter=filter_expr,
     )
+
     results = []
     for r in client.search(request=req).results:
         d = r.document
+
+        # struct_data can be None, a google.protobuf.Struct, or a MapComposite
         struct = d.struct_data
-        fields = struct.fields if struct else {}
-        def sf(name, default=None):
-            return fields[name].string_value if name in fields else default
+        meta = {}
+
+        if struct:
+            # best-effort: treat it like a dict
+            try:
+                # MapComposite behaves like a dict
+                for key, value in struct.items():
+                    # value can be Value/Struct; try to get string_value / number_value
+                    if hasattr(value, "string_value"):
+                        meta[key] = value.string_value
+                    elif hasattr(value, "number_value"):
+                        meta[key] = value.number_value
+                    else:
+                        # fallback to plain Python
+                        meta[key] = value
+            except AttributeError:
+                # older style: struct.fields
+                if hasattr(struct, "fields"):
+                    for key, value in struct.fields.items():
+                        meta[key] = value.string_value
+
         results.append({
             "title": d.title,
             "uri": d.uri,
             "snippet": d.snippet,
-            "metadata": {
-                "source_id": sf("source_id"),
-                "source_type": sf("source_type"),
-                "page": sf("page"),
-                "slide": sf("slide"),
-                "start_sec": sf("start_sec"),
-                "end_sec": sf("end_sec"),
-            }
+            "metadata": meta,
         })
+
     return results
 
 @app.post("/chat")
 def chat(req: ChatReq):
     try:
         hits = vertex_search(req.question, k=req.k, filter_expr=req.filter)
-        # later we can call Gemini on top, for now return raw hits
         return {
             "answer": f"found {len(hits)} hits",
             "hits": hits,
