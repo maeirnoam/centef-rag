@@ -1,5 +1,7 @@
 Here’s the full set, grouped so it’s not a mess.
 
+git pull origin main
+
 ## 1. Core project + region (you can put these in your shell profile)
 
 ```bash

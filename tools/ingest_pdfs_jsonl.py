@@ -45,13 +45,20 @@ def get_storage_client():
     return storage.Client()
 
 
-def start_batch_for_pdf(gcs_input_uri: str, gcs_output_prefix: str) -> Operation:
+def process_pdf_batch(gcs_input_uri: str) -> documentai.Document:
     """
-    Start an async batch for a single GCS PDF.
-    DocAI will write output JSON to gcs_output_prefix.
+    Process a single PDF using batch processing (required for Layout Parser).
+    Returns the processed Document.
     """
     client = get_docai_client()
     name = client.processor_path(PROJECT_ID, DOCAI_LOCATION, DOCAI_PROCESSOR_ID)
+
+    # Create temp output location
+    base_name = gcs_input_uri.split("/")[-1].replace(".pdf", "")
+    output_prefix = f"gs://{TARGET_BUCKET}/_docai_temp/{base_name}/"
+    
+    if not output_prefix.endswith("/"):
+        output_prefix = output_prefix + "/"
 
     gcs_document = documentai.GcsDocument(
         gcs_uri=gcs_input_uri,
@@ -60,14 +67,10 @@ def start_batch_for_pdf(gcs_input_uri: str, gcs_output_prefix: str) -> Operation
     input_config = documentai.BatchDocumentsInputConfig(
         gcs_documents=documentai.GcsDocuments(documents=[gcs_document])
     )
-
-    # output must end with /
-    if not gcs_output_prefix.endswith("/"):
-        gcs_output_prefix = gcs_output_prefix + "/"
-
+    
     output_config = documentai.DocumentOutputConfig(
         gcs_output_config=documentai.DocumentOutputConfig.GcsOutputConfig(
-            gcs_uri=gcs_output_prefix
+            gcs_uri=output_prefix
         )
     )
 
@@ -75,42 +78,40 @@ def start_batch_for_pdf(gcs_input_uri: str, gcs_output_prefix: str) -> Operation
         name=name,
         input_documents=input_config,
         document_output_config=output_config,
+        skip_human_review=True
     )
 
-    op = client.batch_process_documents(request)
-    return op
-
-
-def wait_for_op(op: Operation, poll: float = 5.0):
-    print("Waiting for Document AI to finish ...")
-    while not op.done():
-        time.sleep(poll)
-    if op.exception():
-        raise op.exception()
-    print("Document AI finished.")
-
-
-def read_docai_output_json(gcs_output_prefix: str) -> dict:
-    """
-    DocAI writes 1+ JSON files to the output prefix.
-    For single input doc + layout processor, it's usually output-1-to-1.json
-    """
+    print(f"Starting batch processing for {gcs_input_uri}...")
+    operation = client.batch_process_documents(request)
+    
+    # Wait for completion
+    print("Waiting for Document AI to complete...")
+    operation.result(timeout=300)  # 5 minute timeout
+    
+    print("Document AI finished. Reading output...")
+    
+    # Read the output JSON from GCS
     storage_client = get_storage_client()
-
-    # gcs_output_prefix is like: gs://bucket/path/to/output/
-    assert gcs_output_prefix.startswith("gs://")
-    out_bucket, out_prefix = gcs_output_prefix.replace("gs://", "").split("/", 1)
-    bucket = storage_client.bucket(out_bucket)
-
-    # list blobs under prefix
-    blobs = list(bucket.list_blobs(prefix=out_prefix))
-    # pick the first json
+    bucket_name = output_prefix.replace("gs://", "").split("/")[0]
+    prefix_path = "/".join(output_prefix.replace("gs://", "").split("/")[1:])
+    
+    bucket = storage_client.bucket(bucket_name)
+    blobs = list(bucket.list_blobs(prefix=prefix_path))
+    
+    # Find the JSON output file
     json_blobs = [b for b in blobs if b.name.endswith(".json")]
     if not json_blobs:
-        raise RuntimeError(f"No JSON output found under {gcs_output_prefix}")
-    # usually there's just one
-    content = json_blobs[0].download_as_text(encoding="utf-8")
-    return json.loads(content)
+        raise RuntimeError(f"No JSON output found in {output_prefix}")
+    
+    # Read and parse the JSON
+    json_content = json_blobs[0].download_as_text()
+    doc_dict = json.loads(json_content)
+    
+    # Clean up temp files
+    for blob in blobs:
+        blob.delete()
+    
+    return doc_dict
 
 
 def extract_chunks_from_doc(doc: dict, source_uri: str) -> List[Dict]:
@@ -206,16 +207,11 @@ def upload_jsonl(records: List[Dict], target_blob: str):
 def process_one_pdf(source_uri: str):
     print(f"== Processing single PDF: {source_uri}")
 
-    # We'll tell DocAI to write its raw output under the SAME target bucket but under _docai_out/
-    # so: gs://centef-rag-chunks/_docai_out/<filename>/
-    base_name = source_uri.split("/")[-1].replace(".pdf", "")
-    docai_output_prefix = f"gs://{TARGET_BUCKET}/_docai_out/{base_name}/"
-
-    op = start_batch_for_pdf(source_uri, docai_output_prefix)
-    wait_for_op(op)
-
-    doc_json = read_docai_output_json(docai_output_prefix)
+    # Process PDF with batch processing (required for Layout Parser)
+    doc_json = process_pdf_batch(source_uri)
+    
     chunks = extract_chunks_from_doc(doc_json, source_uri)
+    print(f"Extracted {len(chunks)} chunks")
 
     # final Discovery jsonl, mirroring source path:
     rel_path = source_uri.replace(f"gs://{SOURCE_BUCKET}/", "")
