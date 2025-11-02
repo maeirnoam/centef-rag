@@ -269,6 +269,8 @@ def process_video(video_gcs_uri: str, audio_gcs_uri: Optional[str] = None,
     
     # Upload
     rel_path = video_gcs_uri.replace(f"gs://{SOURCE_BUCKET}/", "")
+    # Sanitize path: replace :// with _ to avoid GCS path issues (e.g., youtube://id -> youtube_id)
+    rel_path = rel_path.replace("://", "_")
     target_blob = f"{rel_path}.jsonl"
     upload_jsonl(chunks, target_blob)
 
