@@ -1,0 +1,22 @@
+# Core API framework
+fastapi==0.115.2
+uvicorn[standard]==0.31.1
+pydantic==2.9.2
+
+# Google Cloud services
+google-cloud-storage==2.18.2
+google-cloud-discoveryengine==0.15.0
+google-cloud-documentai==2.25.0
+google-cloud-speech==2.27.0
+
+# AI/ML frameworks
+vertexai==1.70.0
+langchain==0.3.7
+langgraph==0.2.39
+
+# Document processing
+pymupdf==1.24.9
+
+# Utilities
+requests==2.32.3
+python-dotenv==1.0.0
