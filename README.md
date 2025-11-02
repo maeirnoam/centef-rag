@@ -132,6 +132,28 @@ The video ingestion tool:
 - Stores both original and translated text in chunks
 - Creates time-windowed chunks (default 30 seconds) from transcription segments
 
+### YouTube Ingestion
+```powershell
+# Ingest English YouTube video (no translation needed)
+python tools/ingest_youtube.py "https://www.youtube.com/watch?v=VIDEO_ID" \
+  --language en-US \
+  --translate none \
+  --window 30
+
+# Ingest Arabic YouTube video with English translation
+python tools/ingest_youtube.py "https://www.youtube.com/watch?v=VIDEO_ID" \
+  --language ar-SA \
+  --translate en \
+  --window 30
+```
+
+The YouTube ingestion tool:
+- Downloads audio using yt-dlp and converts to 16kHz mono WAV with ffmpeg
+- Uploads audio to GCS automatically
+- Calls the video transcription pipeline (Speech-to-Text + optional Translation)
+- Creates time-windowed chunks with timestamps for precise navigation
+- Requires: `yt-dlp` package and `ffmpeg` installed locally
+
 ### Trigger Discovery Engine Import
 ```powershell
 # Import all JSONL files from the chunks bucket
@@ -206,6 +228,7 @@ uvicorn apps.agent_api.main:app --reload --port 8080
 - ✅ **PDFs**: Page-level text extraction using PyMuPDF, with page anchors
 - ✅ **SRT Subtitles**: Time-windowed chunking (30-second windows) from subtitle files
 - ✅ **Videos**: Audio extraction with ffmpeg, transcription via Speech-to-Text API, translation support for multilingual content
+- ✅ **YouTube**: Direct ingestion from YouTube URLs using yt-dlp, automatic audio download and transcription
 - ✅ **Search**: AI-generated summaries with citations and precise anchors (page numbers, timestamps)
 
 ### Roadmap
