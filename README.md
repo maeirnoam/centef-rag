@@ -24,9 +24,10 @@ This repo follows the design in `.github/instructions/multiModalRag.instructions
 	- Cloud Build API
 	- Artifact Registry API
 	- Cloud Storage
-	- Speech-to-Text v2 (if using Google ASR)
+	- Speech-to-Text API (for video/audio transcription)
+	- Cloud Translation API (for multilingual video transcription)
 	- Document AI (optional)
-- Service account with roles: Storage Admin (or Object Admin), Discovery Engine Admin, Vertex AI User, Cloud Run Admin (for deploy), Speech-to-Text Admin (if STT), Document AI Editor (if DocAI).
+- Service account with roles: Storage Admin (or Object Admin), Discovery Engine Admin, Vertex AI User, Cloud Run Admin (for deploy), Speech-to-Text Admin, Cloud Translation User, Document AI Editor (if DocAI).
 
 ## Buckets and Data Store
 
@@ -89,7 +90,64 @@ gcloud run deploy ingest-images --image "{REGION}-docker.pkg.dev/{PROJECT}/cente
 
 Tip: For faster builds, create an Artifact Registry repo `centef` beforehand and use `--source` pointing at each app with a simple Dockerfile context. The above submits the whole repo for brevity.
 
-## Try it
+## Local tools for ingestion
+
+Several standalone tools are provided in the `tools/` directory for local batch ingestion:
+
+### PDF Ingestion
+```powershell
+# Ingest a single PDF with page-level chunking
+python tools/ingest_pdf_pages.py "gs://centef-rag-bucket/data/document.pdf"
+
+# Process all PDFs in the source bucket
+python tools/ingest_pdf_pages.py
+```
+
+### SRT Subtitle Ingestion
+```powershell
+# Ingest SRT with 30-second time windows
+python tools/ingest_srt.py "gs://centef-rag-bucket/data/video.srt"
+
+# Process all SRT files
+python tools/ingest_srt.py
+```
+
+### Video Ingestion (Transcription + Translation)
+```powershell
+# Step 1: Extract audio from video (requires ffmpeg)
+python tools/extract_audio.py "gs://centef-rag-bucket/data/video.mp4"
+
+# Step 2: Transcribe (Arabic) and translate (English) with 30-second windows
+python tools/ingest_video.py "gs://centef-rag-bucket/data/video.mp4" \
+  --audio-uri "gs://centef-rag-bucket/data/video.wav" \
+  --language ar-SA \
+  --translate en \
+  --window 30
+```
+
+The video ingestion tool:
+- Uses Google Speech-to-Text API for transcription with word-level timestamps
+- Supports multiple languages (e.g., ar-SA for Arabic, en-US for English)
+- Uses Google Cloud Translation API to translate to target language
+- Stores both original and translated text in chunks
+- Creates time-windowed chunks (default 30 seconds) from transcription segments
+
+### Trigger Discovery Engine Import
+```powershell
+# Import all JSONL files from the chunks bucket
+python tools/trigger_datastore_import.py
+```
+
+### Search with AI Summary
+```powershell
+# Search with AI-generated summary and citations
+python tools/search_with_summary.py "your search query"
+
+# Simple search
+python tools/search_datastore.py "your search query"
+```
+
+## Try it (Cloud Run)
 
 1) Ingest a PDF (replace values):
 
@@ -113,9 +171,12 @@ Invoke-RestMethod -Method Post -Uri "https://<AGENT_API_URL>/chat" -ContentType 
 ```
 
 ## Anchors and citations
-- Docs: page number included in `modality_payload.page`; retriever returns it in metadata.
-- AV: segments include `start_sec` and `end_sec`; answer prompt formats [start-end s].
-- Images: one chunk per image for now; you can extend with object/region-level anchors.
+- **PDFs**: Page numbers displayed as `[Page N]` in search results, stored in `structData.page`
+- **Videos/Audio**: Timestamps displayed as `[MM:SS - MM:SS]` in search results, stored in `structData.start_sec` and `structData.end_sec`
+- **SRT subtitles**: Time-windowed chunks with timestamp ranges for precise navigation
+- **Images**: Single chunk per image (can be extended with region-level anchors)
+
+Search results automatically detect content type and format anchors accordingly, enabling direct navigation to relevant content.
 
 ## Updates and deletes
 
@@ -139,8 +200,25 @@ $env:DISCOVERY_SERVING_CONFIG = "projects/<PROJECT>/locations/<LOC>/collections/
 uvicorn apps.agent_api.main:app --reload --port 8080
 ```
 
+## Supported Content Types
+
+### Current Implementation
+- ✅ **PDFs**: Page-level text extraction using PyMuPDF, with page anchors
+- ✅ **SRT Subtitles**: Time-windowed chunking (30-second windows) from subtitle files
+- ✅ **Videos**: Audio extraction with ffmpeg, transcription via Speech-to-Text API, translation support for multilingual content
+- ✅ **Search**: AI-generated summaries with citations and precise anchors (page numbers, timestamps)
+
+### Roadmap
+- 🔄 **PPTX**: Slide-level extraction (can add LibreOffice soffice conversion in Dockerfile)
+- 🔄 **Audio files**: Direct audio ingestion without video extraction
+- 🔄 **Images**: OCR and captioning with Vision API or Document AI
+- 🔄 **Cloud Run deployment**: Containerized services ready for production deployment
+
 ## Notes
 
+- **Video transcription** supports 125+ languages via Speech-to-Text API (e.g., ar-SA for Arabic, en-US for English)
+- **Translation** available for all videos via Cloud Translation API, storing both original and translated text
+- **Audio extraction** requires ffmpeg installed locally or in container
 - PPTX → PDF conversion can be added in `ingest_docs` Dockerfile with LibreOffice (soffice) and a small wrapper; current version expects PDF already.
 - For high-fidelity images/diagrams, plug Gemini 1.5 Vision or Document AI Form Parser to enrich `text` and `modality_payload`.
 - If you prefer Vertex AI Agent Builder for conversation, you can still reuse this indexing path and call Retrieval via its Search grounding from the agent.
