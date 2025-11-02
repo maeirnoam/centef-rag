@@ -1,206 +1,260 @@
 import json
 import os
 import sys
+import time
 from typing import List, Dict, Optional
 
 from google.cloud import documentai_v1 as documentai
 from google.cloud import storage
+from google.api_core.operation import Operation
 
 
 def env(name: str, default: Optional[str] = None) -> str:
-    val = os.environ.get(name, default)
-    if val is None:
-        raise RuntimeError(f"Missing required env var: {name}")
-    return val
+    v = os.environ.get(name, default)
+    if v is None:
+        raise RuntimeError(f"Missing env var: {name}")
+    return v
 
 
-# ====== READ FROM ENV ======
+# ====== ENV ======
 PROJECT_ID = env("PROJECT_ID", "sylvan-faculty-476113-c9")
 DOCAI_LOCATION = env("DOCAI_LOCATION", "us")
 DOCAI_PROCESSOR_ID = env("DOCAI_PROCESSOR_ID", "666f583067e8ebff")
 
-# user sometimes puts gs:// in the bucket vars — normalize
-def normalize_bucket(b: str) -> str:
-    return b.replace("gs://", "").strip("/")
+SOURCE_BUCKET = env("SOURCE_BUCKET", "centef-rag-bucket").replace("gs://", "").strip("/")
+TARGET_BUCKET = env("TARGET_BUCKET", "centef-rag-chunks").replace("gs://", "").strip("/")
 
-SOURCE_BUCKET = normalize_bucket(env("SOURCE_BUCKET", "centef-rag-bucket"))
-TARGET_BUCKET = normalize_bucket(env("TARGET_BUCKET", "centef-rag-chunks"))
+# where your PDFs live inside SOURCE_BUCKET (e.g. "data")
+SOURCE_DATA_PREFIX = os.environ.get("SOURCE_DATA_PREFIX", "data").strip("/")
 
-# optional: prefix where PDFs live
-SOURCE_DATA_PREFIX = os.environ.get("SOURCE_DATA_PREFIX", "")  # can be gs://.../data
-if SOURCE_DATA_PREFIX.startswith("gs://"):
-    # turn "gs://centef-rag-bucket/data" into prefix "data"
-    _tmp = SOURCE_DATA_PREFIX.replace(f"gs://{SOURCE_BUCKET}/", "")
-    SOURCE_DATA_PREFIX = _tmp.strip("/")
+# discovery / datastore id (for reference)
+DISCOVERY_GCS_STORE = os.environ.get(
+    "DISCOVERY_GCS_STORE",
+    "centef-chunk-data-store_1761831236752_gcs_store"
+)
 # =================================
 
 
 def get_docai_client():
-    return documentai.DocumentProcessorServiceClient()
+    return documentai.DocumentProcessorServiceClient(
+        client_options={"api_endpoint": f"{DOCAI_LOCATION}-documentai.googleapis.com"}
+    )
 
 
-def process_gcs_pdf(gcs_uri: str) -> documentai.types.Document:
+def get_storage_client():
+    return storage.Client()
+
+
+def start_batch_for_pdf(gcs_input_uri: str, gcs_output_prefix: str) -> Operation:
+    """
+    Start an async batch for a single GCS PDF.
+    DocAI will write output JSON to gcs_output_prefix.
+    """
     client = get_docai_client()
     name = client.processor_path(PROJECT_ID, DOCAI_LOCATION, DOCAI_PROCESSOR_ID)
 
     gcs_document = documentai.GcsDocument(
-        gcs_uri=gcs_uri,
+        gcs_uri=gcs_input_uri,
         mime_type="application/pdf",
     )
-    gcs_documents = documentai.GcsDocuments(documents=[gcs_document])
-    input_config = documentai.BatchDocumentsInputConfig(gcs_documents=gcs_documents)
+    input_config = documentai.BatchDocumentsInputConfig(
+        gcs_documents=documentai.GcsDocuments(documents=[gcs_document])
+    )
 
-    request = documentai.ProcessRequest(
+    # output must end with /
+    if not gcs_output_prefix.endswith("/"):
+        gcs_output_prefix = gcs_output_prefix + "/"
+
+    output_config = documentai.DocumentOutputConfig(
+        gcs_output_config=documentai.DocumentOutputConfig.GcsOutputConfig(
+            gcs_uri=gcs_output_prefix
+        )
+    )
+
+    request = documentai.BatchProcessRequest(
         name=name,
         input_documents=input_config,
+        document_output_config=output_config,
     )
-    result = client.process_document(request=request)
-    return result.document
+
+    op = client.batch_process_documents(request)
+    return op
 
 
-def extract_page_chunks(doc: documentai.Document) -> List[Dict]:
+def wait_for_op(op: Operation, poll: float = 5.0):
+    print("Waiting for Document AI to finish ...")
+    while not op.done():
+        time.sleep(poll)
+    if op.exception():
+        raise op.exception()
+    print("Document AI finished.")
+
+
+def read_docai_output_json(gcs_output_prefix: str) -> dict:
+    """
+    DocAI writes 1+ JSON files to the output prefix.
+    For single input doc + layout processor, it's usually output-1-to-1.json
+    """
+    storage_client = get_storage_client()
+
+    # gcs_output_prefix is like: gs://bucket/path/to/output/
+    assert gcs_output_prefix.startswith("gs://")
+    out_bucket, out_prefix = gcs_output_prefix.replace("gs://", "").split("/", 1)
+    bucket = storage_client.bucket(out_bucket)
+
+    # list blobs under prefix
+    blobs = list(bucket.list_blobs(prefix=out_prefix))
+    # pick the first json
+    json_blobs = [b for b in blobs if b.name.endswith(".json")]
+    if not json_blobs:
+        raise RuntimeError(f"No JSON output found under {gcs_output_prefix}")
+    # usually there's just one
+    content = json_blobs[0].download_as_text(encoding="utf-8")
+    return json.loads(content)
+
+
+def extract_chunks_from_doc(doc: dict, source_uri: str) -> List[Dict]:
+    """
+    doc is the dict version of Document AI Document (JSON).
+    Build Discovery-compatible JSONL entries.
+    """
     chunks = []
-    for page_index, page in enumerate(doc.pages, start=1):
-        # combine all blocks
+    fulltext = doc.get("text", "")
+    pages = doc.get("pages", [])
+
+    # helper to read text from anchor
+    def get_text(text_anchor):
+        if not text_anchor:
+            return ""
+        parts = []
+        for seg in text_anchor.get("textSegments", []):
+            start = int(seg.get("startIndex", 0))
+            end = int(seg.get("endIndex", 0))
+            parts.append(fulltext[start:end])
+        return "".join(parts)
+
+    base_name = os.path.basename(source_uri)
+
+    for idx, page in enumerate(pages, start=1):
+        # 1) main page text = all blocks
+        blocks = page.get("blocks", [])
         page_text_parts = []
-        for block in page.blocks:
-            if block.layout and block.layout.text_anchor.text_segments:
-                seg = block.layout.text_anchor.text_segments[0]
-                page_text_parts.append(doc.text[seg.start_index:seg.end_index])
-        main_text = "\n".join(t.strip() for t in page_text_parts if t.strip())
-
-        chunks.append({
-            "id": f"p{page_index}-main",
-            "page": page_index,
-            "type": "page_text",
-            "text": main_text,
-            "metadata": {
-                "page_width": page.dimension.width,
-                "page_height": page.dimension.height,
-            },
-        })
-
-        # tables
-        for t_idx, table in enumerate(page.tables, start=1):
-            rows_text = []
-            for row in table.header_rows + table.body_rows:
-                cells_text = []
-                for cell in row.cells:
-                    text_parts = []
-                    for seg in cell.layout.text_anchor.text_segments:
-                        text_parts.append(doc.text[seg.start_index:seg.end_index])
-                    cells_text.append(" ".join(text_parts).strip())
-                rows_text.append("\t".join(cells_text))
-            table_text = "\n".join(rows_text)
+        for b in blocks:
+            page_text_parts.append(get_text(b.get("layout", {}).get("textAnchor")))
+        page_text = "\n".join(t.strip() for t in page_text_parts if t and t.strip())
+        if page_text:
             chunks.append({
-                "id": f"p{page_index}-table-{t_idx}",
-                "page": page_index,
-                "type": "table",
-                "text": table_text,
+                "id": f"{base_name}_p{idx}_main",
+                "content": page_text,
                 "metadata": {
-                    "rows": len(table.header_rows) + len(table.body_rows),
-                    "cols": len(table.header_rows[0].cells) if table.header_rows else (
-                        len(table.body_rows[0].cells) if table.body_rows else 0
-                    ),
+                    "source_uri": source_uri,
+                    "page": idx,
+                    "type": "page_text",
+                    "processor_id": DOCAI_PROCESSOR_ID,
                 }
             })
 
-        # visual elements (images/charts/figures)
-        if hasattr(page, "visual_elements"):
-            for v_idx, ve in enumerate(page.visual_elements, start=1):
-                ve_type = ve.type_ or "image"
-                ve_text = ""
-                if ve.layout and ve.layout.text_anchor.text_segments:
-                    for seg in ve.layout.text_anchor.text_segments:
-                        ve_text += doc.text[seg.start_index:seg.end_index]
-                chunks.append({
-                    "id": f"p{page_index}-visual-{v_idx}",
-                    "page": page_index,
+        # 2) tables
+        for t_i, table in enumerate(page.get("tables", []), start=1):
+            rows_text = []
+            # header + body
+            for row in table.get("headerRows", []) + table.get("bodyRows", []):
+                cells_text = []
+                for cell in row.get("cells", []):
+                    cells_text.append(get_text(cell.get("layout", {}).get("textAnchor")).strip())
+                rows_text.append("\t".join(cells_text))
+            table_text = "\n".join(rows_text)
+            chunks.append({
+                "id": f"{base_name}_p{idx}_table_{t_i}",
+                "content": table_text,
+                "metadata": {
+                    "source_uri": source_uri,
+                    "page": idx,
+                    "type": "table",
+                    "rows": len(table.get("headerRows", [])) + len(table.get("bodyRows", [])),
+                    "processor_id": DOCAI_PROCESSOR_ID,
+                }
+            })
+
+        # 3) visual elements
+        for v_i, ve in enumerate(page.get("visualElements", []), start=1):
+            ve_type = ve.get("type", "image")
+            ve_text = get_text(ve.get("layout", {}).get("textAnchor"))
+            chunks.append({
+                "id": f"{base_name}_p{idx}_visual_{v_i}",
+                "content": ve_text.strip(),
+                "metadata": {
+                    "source_uri": source_uri,
+                    "page": idx,
                     "type": ve_type,
-                    "text": ve_text.strip(),
-                    "metadata": {}
-                })
+                    "processor_id": DOCAI_PROCESSOR_ID,
+                }
+            })
+
     return chunks
 
 
-def upload_json_to_gcs(bucket_name: str, blob_name: str, data: dict):
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(blob_name)
-    blob.upload_from_string(
-        json.dumps(data, ensure_ascii=False, indent=2),
-        content_type="application/json"
-    )
-    print(f"[OK] gs://{bucket_name}/{blob_name}")
+def upload_jsonl(records: List[Dict], target_blob: str):
+    storage_client = get_storage_client()
+    bucket = storage_client.bucket(TARGET_BUCKET)
+    blob = bucket.blob(target_blob)
+    ndjson = "\n".join(json.dumps(r, ensure_ascii=False) for r in records)
+    blob.upload_from_string(ndjson, content_type="application/x-ndjson")
+    print(f"[OK] uploaded {len(records)} chunks → gs://{TARGET_BUCKET}/{target_blob}")
 
 
-def list_pdfs_in_bucket(bucket_name: str, prefix: str = "") -> List[str]:
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blobs = bucket.list_blobs(prefix=prefix)
+def process_one_pdf(source_uri: str):
+    print(f"== Processing single PDF: {source_uri}")
+
+    # We'll tell DocAI to write its raw output under the SAME target bucket but under _docai_out/
+    # so: gs://centef-rag-chunks/_docai_out/<filename>/
+    base_name = source_uri.split("/")[-1].replace(".pdf", "")
+    docai_output_prefix = f"gs://{TARGET_BUCKET}/_docai_out/{base_name}/"
+
+    op = start_batch_for_pdf(source_uri, docai_output_prefix)
+    wait_for_op(op)
+
+    doc_json = read_docai_output_json(docai_output_prefix)
+    chunks = extract_chunks_from_doc(doc_json, source_uri)
+
+    # final Discovery jsonl, mirroring source path:
+    rel_path = source_uri.replace(f"gs://{SOURCE_BUCKET}/", "")
+    target_blob = f"{rel_path}.jsonl"
+    upload_jsonl(chunks, target_blob)
+
+
+def list_pdfs_in_bucket(prefix: str) -> List[str]:
+    sc = get_storage_client()
+    bucket = sc.bucket(SOURCE_BUCKET)
     pdfs = []
-    for b in blobs:
-        if b.name.lower().endswith(".pdf"):
-            pdfs.append(f"gs://{bucket_name}/{b.name}")
+    for blob in bucket.list_blobs(prefix=prefix):
+        if blob.name.lower().endswith(".pdf"):
+            pdfs.append(f"gs://{SOURCE_BUCKET}/{blob.name}")
     return pdfs
 
 
-def target_name_from_source_uri(source_uri: str) -> str:
-    # source: gs://centef-rag-bucket/data/folder/file.pdf
-    # target: data/folder/file.pdf.json
-    src_bucket = f"gs://{SOURCE_BUCKET}/"
-    rel_path = source_uri.replace(src_bucket, "")
-    return f"{rel_path}.json"
-
-
-def process_one_pdf(gcs_uri: str):
-    print(f"== Processing single PDF: {gcs_uri}")
-    doc = process_gcs_pdf(gcs_uri)
-    chunks = extract_page_chunks(doc)
-    out_obj = {
-        "source_uri": gcs_uri,
-        "processor_id": DOCAI_PROCESSOR_ID,
-        "chunks": chunks,
-    }
-    target_blob_name = target_name_from_source_uri(gcs_uri)
-    upload_json_to_gcs(TARGET_BUCKET, target_blob_name, out_obj)
-
-
 def main():
-    # CLI:
-    #   python ingest_pdfs.py                -> process all under SOURCE_DATA_PREFIX (if set) or whole bucket
-    #   python ingest_pdfs.py file.pdf       -> process exactly that file under SOURCE_BUCKET (root or prefix)
-    #   python ingest_pdfs.py gs://.../x.pdf -> process that exact URI
     args = sys.argv[1:]
-
     if args:
-        # single-file mode
+        # single file mode
         arg = args[0]
         if arg.startswith("gs://"):
             gcs_uri = arg
         else:
-            # treat as "path inside source bucket"
-            # if user gave "data/my.pdf" and we have SOURCE_DATA_PREFIX="data", fine
-            # if user just gave "my.pdf", we put it at root
+            # treat as path inside source bucket
             path = arg.lstrip("/")
-            if SOURCE_DATA_PREFIX:
-                # if prefix exists, and user gave only filename, prepend prefix
-                if not path.startswith(SOURCE_DATA_PREFIX):
-                    path = f"{SOURCE_DATA_PREFIX.rstrip('/')}/{path}"
+            if SOURCE_DATA_PREFIX and not path.startswith(SOURCE_DATA_PREFIX):
+                path = f"{SOURCE_DATA_PREFIX}/{path}"
             gcs_uri = f"gs://{SOURCE_BUCKET}/{path}"
         process_one_pdf(gcs_uri)
-        return
-
-    # batch mode
-    prefix = SOURCE_DATA_PREFIX
-    print(f"== Batch mode. Listing PDFs in gs://{SOURCE_BUCKET}/{prefix}")
-    pdf_uris = list_pdfs_in_bucket(SOURCE_BUCKET, prefix=prefix)
-    if not pdf_uris:
-        print("No PDFs found.")
-        return
-
-    for uri in pdf_uris:
-        process_one_pdf(uri)
+    else:
+        # batch mode
+        pdfs = list_pdfs_in_bucket(SOURCE_DATA_PREFIX)
+        if not pdfs:
+            print("No PDFs found.")
+            return
+        for uri in pdfs:
+            process_one_pdf(uri)
 
 
 if __name__ == "__main__":
