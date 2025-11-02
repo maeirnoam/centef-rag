@@ -81,17 +81,46 @@ def search_with_summary(query: str):
             print(" -", reason)
 
     # -----------------------------------------------------------------
-    # 3. Show references
+    # 3. Show references with anchors (timestamps or page numbers)
     # -----------------------------------------------------------------
     if hasattr(summary, 'summary_with_metadata') and summary.summary_with_metadata:
         metadata = summary.summary_with_metadata
         if hasattr(metadata, 'references') and metadata.references:
             print("\n=== REFERENCES ===")
+            
+            # We need to fetch the actual documents to get their metadata
+            # For now, let's look them up from the search results
+            results_by_id = {r.document.id: r.document for r in response.results}
+            
             for i, ref in enumerate(metadata.references, 1):
                 # Extract document ID from the full path
                 doc_path = ref.document
                 doc_id = doc_path.split('/')[-1] if '/' in doc_path else doc_path
-                print(f"[{i}] {doc_id}")
+                
+                # Try to get the document from results to access structData
+                doc = results_by_id.get(doc_id)
+                anchor_info = ""
+                
+                if doc and doc.struct_data:
+                    struct_dict = dict(doc.struct_data)
+                    
+                    # Check if it's a video/audio chunk (has start_sec)
+                    if 'start_sec' in struct_dict:
+                        start_sec = struct_dict.get('start_sec', 0)
+                        end_sec = struct_dict.get('end_sec', 0)
+                        # Format as MM:SS
+                        start_min = int(start_sec // 60)
+                        start_s = int(start_sec % 60)
+                        end_min = int(end_sec // 60)
+                        end_s = int(end_sec % 60)
+                        anchor_info = f" [{start_min:02d}:{start_s:02d} - {end_min:02d}:{end_s:02d}]"
+                    
+                    # Check if it's a document page (has page)
+                    elif 'page' in struct_dict:
+                        page = int(struct_dict.get('page', 0))
+                        anchor_info = f" [Page {page}]"
+                
+                print(f"[{i}] {doc_id}{anchor_info}")
 
 
 if __name__ == "__main__":
