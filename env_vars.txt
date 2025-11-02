@@ -1,0 +1,114 @@
+Here’s the full set, grouped so it’s not a mess.
+
+## 1. Core project + region (you can put these in your shell profile)
+
+```bash
+export PROJECT_ID="sylvan-faculty-476113-c9"
+export REGION="us-central1"
+export SERVICE_NAME="centef-rag-agent"
+export SERVICE_URL="https://centef-rag-agent-51695993895.us-central1.run.app"
+export SERVICE_ACCOUNT_EMAIL="centef-rag-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+export DISCOVERY_SERVING_CONFIG="projects/51695993895/locations/global/collections/default_collection/dataStores/centef-chunk-data-store_1761831236752_gcs_store/servingConfigs/default_search"
+export SOURCE_BUCKET="centef-rag-bucket"
+export TARGET_BUCKET="centef-rag-chunks"
+export TARGET_PREFIX="docs"
+export GCP_PROJECT_ID="${PROJECT_ID}"
+export DOCAI_LOCATION="us"
+export DOCAI_PROCESSOR_ID="666f583067e8ebff"    # your centef-pdf-parser (layout)
+# optional: choose parser backend later
+export PDF_PARSER_BACKEND="docai"               # future: mistral
+
+
+python tools/ingest_pdf_blocks.py \
+  --gcs-uri gs://centef-rag-bucket/data/The_Crime-Terror_Nexus_Technology_as_Impact_Factor.pdf
+
+
+export AR_REPO="centef-rag" 
+export IMAGE_NAME="centef-rag-agent"
+export IMAGE_URI="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/${IMAGE_NAME}"
+
+
+gcloud builds submit . \
+  --tag "${IMAGE_URI}" \
+  --project="${PROJECT_ID}"
+
+
+gcloud run deploy "${SERVICE_NAME}" \
+  --image "${IMAGE_URI}" \
+  --region "${REGION}" \
+  --service-account "${SERVICE_ACCOUNT_EMAIL}" \
+  --set-env-vars="DISCOVERY_SERVING_CONFIG=${DISCOVERY_SERVING_CONFIG}" \
+  --project "${PROJECT_ID}"
+
+
+That’s the minimal working deploy.
+
+If you also want the ingestion envs available **inside** the container (for future “/ingest” endpoint), you can add them now:
+
+```bash
+gcloud run deploy "${SERVICE_NAME}" \
+  --image "${IMAGE_URI}" \
+  --region "${REGION}" \
+  --service-account "${SERVICE_ACCOUNT_EMAIL}" \
+  --set-env-vars="DISCOVERY_SERVING_CONFIG=${DISCOVERY_SERVING_CONFIG},SOURCE_BUCKET=${SOURCE_BUCKET},TARGET_BUCKET=${TARGET_BUCKET},TARGET_PREFIX=${TARGET_PREFIX},DOCAI_LOCATION=${DOCAI_LOCATION},DOCAI_PROCESSOR_ID=${DOCAI_PROCESSOR_ID}" \
+  --project "${PROJECT_ID}"
+```
+
+---
+
+## 8. Test (with audience)
+
+```bash
+TOKEN=$(gcloud auth print-identity-token --audiences="${SERVICE_URL}")
+
+curl -X POST "${SERVICE_URL}/chat" \
+  -H "Authorization: Bearer ${TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "what does the demo document talk about?"}'
+```
+
+## Recap list of env vars
+
+Here they are in one block:
+
+```bash
+# core
+export PROJECT_ID="sylvan-faculty-476113-c9"
+export REGION="us-central1"
+
+# cloud run
+export SERVICE_NAME="centef-rag-agent"
+export SERVICE_URL="https://centef-rag-agent-51695993895.us-central1.run.app"
+export SERVICE_ACCOUNT_EMAIL="centef-rag-sa@${PROJECT_ID}.iam.gserviceaccount.com"
+
+# discovery / vertex ai search
+export DISCOVERY_SERVING_CONFIG="projects/51695993895/locations/global/collections/default_collection/dataStores/centef-chunk-data-store_1761831236752_gcs_store/servingConfigs/default_search"
+
+# ingestion
+export SOURCE_BUCKET="centef-rag-bucket"
+export TARGET_BUCKET="centef-rag-chunks"
+export TARGET_PREFIX="docs"
+export GCP_PROJECT_ID="${PROJECT_ID}"
+export DOCAI_LOCATION="us"
+export DOCAI_PROCESSOR_ID="666f583067e8ebff"
+
+# artifact registry
+export AR_REPO="centef-rag"
+export IMAGE_NAME="centef-rag-agent"
+export IMAGE_URI="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/${IMAGE_NAME}"
+
+
+Then:
+
+```bash
+gcloud builds submit . --tag "${IMAGE_URI}" --project "${PROJECT_ID}"
+
+gcloud run deploy "${SERVICE_NAME}" \
+  --image "${IMAGE_URI}" \
+  --region "${REGION}" \
+  --service-account "${SERVICE_ACCOUNT_EMAIL}" \
+  --set-env-vars="DISCOVERY_SERVING_CONFIG=${DISCOVERY_SERVING_CONFIG}" \
+  --project "${PROJECT_ID}"
+
+
+That’s your full build→deploy pipeline with the right envs.
