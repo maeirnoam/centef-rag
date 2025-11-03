@@ -31,11 +31,19 @@ foreach ($SERVICE in $SERVICES) {
     
     # Build and submit to Container Registry
     Write-Host "Building container image..." -ForegroundColor Yellow
-    gcloud builds submit `
-        --project=$PROJECT_ID `
-        --tag=gcr.io/$PROJECT_ID/$SERVICE`:latest `
-        --dockerfile=services/Dockerfile.$SERVICE `
-        .
+    
+    # Create a temporary cloudbuild.yaml
+    $buildConfig = @"
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/$SERVICE:latest', '-f', 'services/Dockerfile.$SERVICE', '.']
+images:
+- 'gcr.io/$PROJECT_ID/$SERVICE:latest'
+"@
+    
+    Set-Location ..
+    $buildConfig | gcloud builds submit --project=$PROJECT_ID --config=-
+    Set-Location services
     
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Error building $SERVICE" -ForegroundColor Red

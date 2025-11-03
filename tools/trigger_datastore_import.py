@@ -31,7 +31,7 @@ CHUNKS_BUCKET = env("TARGET_BUCKET", "centef-rag-chunks").replace("gs://", "").s
 DATASTORES = {
     "chunks": {
         "id": env("DATASTORE_ID", "centef-chunk-data-store_1761831236752_gcs_store"),
-        "gcs_pattern": f"gs://{CHUNKS_BUCKET}/**/*.jsonl",
+        "gcs_pattern": f"gs://{CHUNKS_BUCKET}/data/*.jsonl",  # Only data folder, not summaries
         "description": "Chunks datastore (granular content)"
     },
     "summaries": {

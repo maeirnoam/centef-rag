@@ -31,11 +31,18 @@ for SERVICE in "${SERVICES[@]}"; do
     
     # Build and submit to Container Registry
     echo "Building container image..."
+    cd ..
     gcloud builds submit \
         --project=$PROJECT_ID \
         --tag=gcr.io/$PROJECT_ID/$SERVICE:latest \
-        --dockerfile=services/Dockerfile.$SERVICE \
-        .
+        --config=- <<EOF
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '-t', 'gcr.io/$PROJECT_ID/$SERVICE:latest', '-f', 'services/Dockerfile.$SERVICE', '.']
+images:
+- 'gcr.io/$PROJECT_ID/$SERVICE:latest'
+EOF
+    cd services
     
     # Deploy to Cloud Run
     echo "Deploying to Cloud Run..."
