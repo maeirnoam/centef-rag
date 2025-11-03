@@ -30,6 +30,32 @@ def env(name: str, default: Optional[str] = None) -> str:
     return v
 
 
+def normalize_date(date_str: str) -> str:
+    """
+    Normalize date string to YYYY-MM-DD format.
+    Handles various input formats:
+    - "2024-10" -> "2024-10-01"
+    - "2024" -> "2024-01-01"
+    - "2024-10-15" -> "2024-10-15"
+    - Empty/None -> ""
+    """
+    if not date_str:
+        return ""
+    
+    date_str = date_str.strip()
+    parts = date_str.split("-")
+    
+    if len(parts) == 1:  # Just year: "2024"
+        return f"{parts[0]}-01-01"
+    elif len(parts) == 2:  # Year-month: "2024-10"
+        return f"{parts[0]}-{parts[1]}-01"
+    elif len(parts) == 3:  # Full date: "2024-10-15"
+        return date_str
+    else:
+        print(f"Warning: Invalid date format '{date_str}', using empty string")
+        return ""
+
+
 PROJECT_ID = env("PROJECT_ID", "sylvan-faculty-476113-c9")
 LOCATION = env("VERTEX_LOCATION", "us-central1")
 
@@ -168,6 +194,9 @@ def create_summary_document(
     safe_id = re.sub(r'[^a-zA-Z0-9_-]', '_', source_id)
     doc_id = f"summary_{safe_id}"
     
+    # Normalize date to YYYY-MM-DD format
+    date_str = normalize_date(metadata.get("date", ""))
+    
     struct_data = {
         "text": summary_text,
         "source_id": source_id,
@@ -180,7 +209,7 @@ def create_summary_document(
         "author": metadata.get("author", ""),
         "speaker": metadata.get("speaker", ""),
         "organization": metadata.get("organization", ""),
-        "date": metadata.get("date", ""),
+        "date": date_str,
         "language": metadata.get("language", "en"),
         "tags": metadata.get("tags", []),
         "created_at": datetime.utcnow().isoformat() + "Z",
@@ -283,7 +312,7 @@ def main():
     parser.add_argument("--author", help="Document author")
     parser.add_argument("--speaker", help="Speaker (for videos/audio)")
     parser.add_argument("--organization", help="Organization")
-    parser.add_argument("--date", help="Publication/creation date (YYYY-MM-DD)")
+    parser.add_argument("--date", help="Publication/creation date (YYYY-MM-DD, YYYY-MM, or YYYY - will be normalized)")
     parser.add_argument("--language", default="en", help="Language code (default: en)")
     parser.add_argument("--document-type", help="Type: pdf, video, audio, image, etc.")
     parser.add_argument("--tags", help="Comma-separated tags")
