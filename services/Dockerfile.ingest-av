@@ -1,0 +1,34 @@
+# Dockerfile for Audio/Video Ingestion Service
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies for ffmpeg and audio processing
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Install service-specific dependencies
+RUN pip install --no-cache-dir \
+    fastapi==0.104.1 \
+    uvicorn[standard]==0.24.0 \
+    google-cloud-speech==2.21.0 \
+    google-cloud-translate==3.12.0
+
+# Copy application code
+COPY tools/ ./tools/
+COPY shared/ ./shared/
+COPY services/ingest_av_service.py .
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PORT=8080
+
+# Run the service
+CMD exec uvicorn ingest_av_service:app --host 0.0.0.0 --port ${PORT}
