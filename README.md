@@ -192,6 +192,43 @@ $body = @{ question = "Summarize page 2 of My PDF"; k = 6 } | ConvertTo-Json
 Invoke-RestMethod -Method Post -Uri "https://<AGENT_API_URL>/chat" -ContentType 'application/json' -Body $body
 ```
 
+## Two-Tier Retrieval Architecture (Optional)
+
+For improved search relevance, you can implement a **two-tier retrieval** system using multiple Vertex AI Search datastores:
+
+### Architecture
+1. **Summaries Index** (`summaries_datastore`): One enriched summary per document with metadata
+2. **Chunks Index** (`chunks_datastore`): Granular chunks with page/timestamp anchors (current implementation)
+
+### Benefits
+- **Better Document Discovery**: Summaries capture document-level context, themes, and metadata
+- **Metadata-Rich Search**: Search by author, speaker, organization, date, tags, etc.
+- **Coarse-to-Fine Retrieval**: Find relevant documents first, then drill down to specific chunks
+- **Improved Ranking**: Multi-datastore search combines signals from both levels
+
+### Setup
+```powershell
+# 1. Generate summaries with metadata for all documents
+python tools/ingest_summaries.py --batch --manifest manifest.jsonl
+
+# 2. Create a new Vertex AI Search datastore for summaries
+#    Point it to gs://centef-rag-chunks/summaries/**/*.jsonl
+
+# 3. Create a Search App that combines both datastores
+#    Update SERVING_CONFIG to point to the App's serving config
+
+# 4. Searches now automatically query both summaries and chunks
+python tools/search_with_summary.py "What are the terrorist financing methods?"
+```
+
+### Manifest Format
+Create `manifest.jsonl` with document metadata:
+```json
+{"source_id": "doc1", "chunks_uri": "gs://bucket/doc1.jsonl", "metadata": {"title": "...", "author": "...", "speaker": "...", "organization": "...", "date": "2024-10", "tags": ["tag1", "tag2"]}}
+```
+
+See `manifest.jsonl` for examples with all current documents.
+
 ## Anchors and citations
 - **PDFs**: Page numbers displayed as `[Page N]` in search results, stored in `structData.page`
 - **Videos/Audio**: Timestamps displayed as `[MM:SS - MM:SS]` in search results, stored in `structData.start_sec` and `structData.end_sec`
