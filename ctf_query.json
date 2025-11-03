@@ -1,0 +1,192 @@
+{
+  "query": "what is the CTF money flow scheme",
+  "synthesis": {
+    "answer": "The terrorist financing money flow scheme is a multi-stage process that outlines the entire lifecycle of funding, from its initial acquisition to its eventual expenditure [S1]. This comprehensive visual summary highlights key phases and operational aspects relevant to illicit financial flows, with a core horizontal flow that begins with raising funds [S1].\n\n**Supporting Evidence:**\nAccording to CENTEF's \"Terrorist Financing Flowchart - Figure 1,\" the scheme is depicted as a \"multi-stage process involved in terrorist financing\" that illustrates the \"entire lifecycle of funding, from its initial acquisition to its eventual expenditure\" [S1]. The document specifies that the \"core process is depicted as a horizontal flow encompassing four main stages,\" starting with \"Raise\" [S1].\n\n**Additional Context:**\nThe importance of such financial flow schemes is underscored by leaders like Hezbollah's Secretary-General Nasrallah, who emphasizes that financial resources are not merely a logistical convenience but a fundamental element of \"natural power\" and are indispensable for any resistance movement [S2]. This perspective highlights the critical role of effective money flow for operational continuity and strategic objectives [S2].",
+    "model": "gemini-2.5-flash",
+    "language": "en",
+    "total_results": 10
+  },
+  "summaries": [
+    {
+      "id": "summary_image_terrorist_finance",
+      "title": "",
+      "uri": "",
+      "text": "",
+      "metadata": {
+        "structData": {
+          "created_at": "2025-11-03T09:08:20.169937Z",
+          "type": "document_summary",
+          "source_id": "image_terrorist_finance",
+          "organization": "CENTEF",
+          "num_chunks": 1.0,
+          "chunks_uri": "gs://centef-rag-chunks/data/TerroristFinance-Figure1.jpg.jsonl",
+          "tags": [
+            "terrorist financing",
+            "money laundering",
+            "placement",
+            "layering",
+            "integration"
+          ],
+          "source_uri": "gs://centef-rag-bucket/data/TerroristFinance-Figure1.jpg",
+          "language": "en",
+          "text": "This 2024 English image document, titled \"Terrorist Financing Flowchart - Figure 1\" and authored by CENTEF, provides a comprehensive visual summary of the multi-stage process involved in terrorist financing. The flowchart illustrates the entire lifecycle of funding, from its initial acquisition to its eventual expenditure, highlighting key phases and operational aspects relevant to illicit financial flows.\n\nThe core process is depicted as a horizontal flow encompassing four main stages: **Raise**, **Move**, **Store**, and **Spend**. These stages are further annotated with terminology often associated with anti-money laundering (AML) processes: **PLACEMENT** (for raising and initial moving), **LAYERING** (for storing and obscuring funds), and **INTEGRATION** (for spending and reintroducing funds into the economy). This structure helps in understanding how illicit funds are initially generated, disguised, and ultimately utilized by terrorist entities.\n\nBeneath this primary flow, the diagram elaborates on critical components that support and define these financial movements. **Funding Sources** are identified as both **Legitimate and Illicit**, acknowledging the diverse origins of terrorist funds. **Funding Methods** are categorized as **Formal and Informal**, with an emphasis on the ongoing tension between **Facilitation vs. Detection** in these methods. The diagram then progresses to **Funding Streams**, noting their \"Many Variations,\" indicating the complex and adaptive nature of how money is channeled.\n\nA crucial aspect of the flowchart details how funds are accessed and distributed. Branching from \"Funding Streams,\" the diagram specifies different **Funding Amounts** and their corresponding **Funding Recipients**. Large sums, ranging from **$25 to Millions $$$**, are designated for \"To Organizations.\" Intermediate amounts, specifically \"**$$Thousands to Many Thousands $$**,\" are allocated \"To Operations,\" covering the costs of specific terrorist activities. Smaller sums, from \"**$Hundreds to Thousands $$**,\" are directed \"To Operatives,\" likely for individual expenses or localized actions. These varying amounts then converge into \"Funding Access,\" representing the point where funds become available for use.\n\nOverall, this CENTEF flowchart serves as a valuable resource for understanding the intricate and multifaceted nature of terrorist financing. It captures the essential elements of the funding lifecycle, from fundraising and financial pathways to final operational access, emphasizing the complexity, varied sources, and diverse methods employed in illicit financial networks. Key entities detailed include the main process stages (Raise, Move, Store, Spend), the anti-money laundering annotations (Placement, Layering, Integration), detailed funding stages (Funding Sources, Funding Methods, Funding Streams, Funding Access), and the allocation of funds to Organizations, Operations, and Operatives.",
+          "date": 2024.0,
+          "title": "Terrorist Financing Flowchart - Figure 1",
+          "document_type": "image",
+          "author": "CENTEF"
+        },
+        "id": "summary_image_terrorist_finance"
+      }
+    },
+    {
+      "id": "summary_video_whatsapp_arabic",
+      "title": "",
+      "uri": "",
+      "text": "",
+      "metadata": {
+        "structData": {
+          "language": "ar",
+          "created_at": "2025-11-03T09:08:46.413242Z",
+          "type": "document_summary",
+          "source_id": "video_whatsapp_arabic",
+          "chunks_uri": "gs://centef-rag-chunks/data/WhatsApp Video 2024-10-27 at 23.04.38.mp4.jsonl",
+          "num_chunks": 1.0,
+          "date": "2024-10-27",
+          "tags": [
+            "Arabic",
+            "video",
+            "Nasrallah",
+            "Hezbollah"
+          ],
+          "text": "A WhatsApp Video, featuring Arabic content, records a speech by Hezbollah's Secretary-General Nasrallah on October 27, 2024, emphasizing the indispensable role of financial resources for any resistance movement. In his address, Nasrallah articulates that money is not merely a logistical convenience but a fundamental element of \"natural power,\" grounded in what he describes as \"the laws of life\" and \"divine laws governing history and society.\" This perspective positions financial strength as a universal and intrinsic requirement for sustaining any prolonged struggle or movement.\n\nNasrallah highlights that the requirement for financial stability extends far beyond conventional military engagements. He draws parallels, stating that just as there is a direct military confrontation, there are also intertwined forms of warfare: media, political, and cultural. Each of these domains, according to his speech, necessitates substantial financial backing to be effective. For instance, in media warfare, funds are crucial for disseminating information, shaping narratives, and countering opposing propaganda. Politically, financial resources can support outreach, alliances, and influence operations. Culturally, money can be channeled into educational initiatives, cultural events, or community programs designed to foster solidarity and strengthen identity, all of which are essential for a resistance movement's long-term viability and public support.\n\nFurthermore, Nasrallah explicitly identifies the existence of an \"financial and economic war,\" alongside psychological warfare. This suggests a comprehensive strategy where financial resilience is not only about funding internal operations but also about navigating and counteracting external economic pressures, such as sanctions or economic sabotage. The ability to sustain an economy or support a population base under duress becomes a critical front in this type of conflict. In the realm of psychological warfare, the perceived financial strength or weakness of a resistance movement can significantly impact morale, public confidence, and the will to fight, both among its supporters and its adversaries. A robust financial footing projects an image of resilience and capability, which can be a powerful psychological tool.\n\nIn essence, Nasrallah's speech, delivered amidst complex regional dynamics, underscores his conviction that financial resources are a multi-faceted and strategic component of resistance. He portrays money as a foundational pillar that underpins all aspects of struggle—military, informational, political, cultural, economic, and psychological—aligning with what he views as fundamental laws of power and societal dynamics. This statement from Hezbollah's leader provides critical insight into the organization's strategic thinking regarding resource allocation and the comprehensive nature of its long-term resistance efforts.",
+          "source_uri": "gs://centef-rag-bucket/data/WhatsApp Video 2024-10-27 at 23.04.38.mp4",
+          "document_type": "video",
+          "title": "WhatsApp Video - Arabic Content, speech by Nasrallah of Hezbollah"
+        },
+        "id": "summary_video_whatsapp_arabic"
+      }
+    }
+  ],
+  "chunks": [
+    {
+      "id": "Syria_Finances_Round_Table_Recording_Jan_8_2025_chunk_70",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+      "text": "To the finances And money flows Kind of In and out My simple question If you may Where do we go from here? Where does the country Go from here? What are the exit scenarios Or the different scenarios That are in play For the future of Syria Or the different Syrias? It's a very very very simple question I mean if we",
+      "metadata": {
+        "text": "To the finances And money flows Kind of In and out My simple question If you may Where do we go from here? Where does the country Go from here? What are the exit scenarios Or the different scenarios That are in play For the future of Syria Or the different Syrias? It's a very very very simple question I mean if we",
+        "type": "subtitle_chunk",
+        "duration_sec": 30.0,
+        "end_sec": 2043.0,
+        "source_uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+        "start_sec": 2013.0,
+        "segment_count": 16.0,
+        "extractor": "srt_parser"
+      }
+    },
+    {
+      "id": "Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud_page_6",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud.pdf",
+      "text": "6\nbehavior in real time. Thus, they manage to reach focused audiences, tailor \nmore specific fraud schemes to them, and direct them to interfaces where they \nare asked to provide personal information, account details, and various assets, \nor to deposit money under the false pretense of a financial investment. The \nadvertising and sponsored promotion mechanisms of social media platforms — which \nare powerful targeting and advertising tools that allow advertisers to reach target \naudiences with maximum precision and generate high rates of interaction with \ntheir ads — have become, in the hands of fraudsters and malicious actors, a \nsophisticated and effective digital fraud machine.\nISOC-IL’s Internet Safety Hotline (www.safe.org.il) has been in operation \nsince 2013 and provides assistance, guidance, information, and tools to \ninternet and social media users in Israel. The Hotline’s mission is to provide \nsupport in the battle against a wide range of online threats and harms. As an \nofficially recognized reporting body (Trusted Flagger) by a number of leading \nglobal platforms, the Hotline receives hundreds of reports monthly, tracks and \nanalyzes patterns and trends that emerge, and escalates malicious indicators \n(IOCs) and signals to other NGOs and stakeholders for further action and \ncoordinated response to problematic phenomena. The present report is based \non data extracted from reports submitted to the Internet Safety Hotline \nfrom 2023 to 2025 and presents a comprehensive analysis of hundreds of \nads and content pieces pointing to the increasing and targeted use of \nAI technologies, deepfake, and sponsored promotion on social media \nfor the purpose of financial fraud in Israel. This document presents the scope \nof the phenomenon, the operational mechanisms used by fraudsters, and the \nfailures of platforms and authorities in detecting, preventing, and addressing \nAI and deepfake fraud against Israelis on social networks. \nThe present review reveals and analyzes a growing trend that began in 2023 \nand has since intensified, in which fraudsters create deepfake videos featuring \nfamiliar public figures - such as politicians, celebrities, and businesspeople - \nseemingly recommending fake investment opportunities or other products and \nAlgorithmic Scams:  Social Media and Artificial Intelligence as Instruments of Financial Fraud",
+      "metadata": {
+        "text": "6\nbehavior in real time. Thus, they manage to reach focused audiences, tailor \nmore specific fraud schemes to them, and direct them to interfaces where they \nare asked to provide personal information, account details, and various assets, \nor to deposit money under the false pretense of a financial investment. The \nadvertising and sponsored promotion mechanisms of social media platforms — which \nare powerful targeting and advertising tools that allow advertisers to reach target \naudiences with maximum precision and generate high rates of interaction with \ntheir ads — have become, in the hands of fraudsters and malicious actors, a \nsophisticated and effective digital fraud machine.\nISOC-IL’s Internet Safety Hotline (www.safe.org.il) has been in operation \nsince 2013 and provides assistance, guidance, information, and tools to \ninternet and social media users in Israel. The Hotline’s mission is to provide \nsupport in the battle against a wide range of online threats and harms. As an \nofficially recognized reporting body (Trusted Flagger) by a number of leading \nglobal platforms, the Hotline receives hundreds of reports monthly, tracks and \nanalyzes patterns and trends that emerge, and escalates malicious indicators \n(IOCs) and signals to other NGOs and stakeholders for further action and \ncoordinated response to problematic phenomena. The present report is based \non data extracted from reports submitted to the Internet Safety Hotline \nfrom 2023 to 2025 and presents a comprehensive analysis of hundreds of \nads and content pieces pointing to the increasing and targeted use of \nAI technologies, deepfake, and sponsored promotion on social media \nfor the purpose of financial fraud in Israel. This document presents the scope \nof the phenomenon, the operational mechanisms used by fraudsters, and the \nfailures of platforms and authorities in detecting, preventing, and addressing \nAI and deepfake fraud against Israelis on social networks. \nThe present review reveals and analyzes a growing trend that began in 2023 \nand has since intensified, in which fraudsters create deepfake videos featuring \nfamiliar public figures - such as politicians, celebrities, and businesspeople - \nseemingly recommending fake investment opportunities or other products and \nAlgorithmic Scams:  Social Media and Artificial Intelligence as Instruments of Financial Fraud",
+        "source_uri": "gs://centef-rag-bucket/data/Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud.pdf",
+        "type": "page_text",
+        "page": 6.0,
+        "extractor": "pymupdf"
+      }
+    },
+    {
+      "id": "Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud_page_10",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud.pdf",
+      "text": "10\nfamiliar figures for their own benefit. For example, the fraudsters manipulate \nthe presenters’ facial expressions and lip movements using AI tools to match \nthe content and marketing messages promoting the scheme, persuading the \ntarget audience to invest in it or purchase it. The goal is to create content \nthat appears as real and credible as possible and grounded in reality, so that \nit seems as if the featured individual is truly endorsing the fake investment \nor product with their own voice — something that might appear plausible to \nthe targeted audience.\nTo increase the effectiveness of the fraudulent promotional videos, each video \nis carefully tailored to different target audiences. Thus, the fraudsters produce \ndozens of different versions of the fraudulent video featuring various famous \n\"presenters,” so that the ads are personally customized to different target \npopulation groups based on their interests and preferences. The fraudsters \nprecisely match the presenters, language, visual style, and marketing messages \nto maximize their appeal to the users. At times, the video content is updated \nin line with trends, events, and current public discourse to create Real Time \nMarketing (RTM), which increases the relevance and effectiveness of the fake \nvideos in the eyes of the victims and makes the forgery harder to detect.\nFor example, novice investors will be shown videos emphasizing quick profits, \nfeaturing a well-known financial figure (such as an investment expert who \nfrequently appears on television or social media) or a politician they support \n(such as the Minister of Finance). Older users will be targeted with videos and \nmessages focusing on financial security and stability featuring trustworthy \nand familiar figures (such as the President of Israel or the Governor of the \nBank of Israel). Younger audiences will be targeted with videos featuring \ntech-related figures (such as Elon Musk or Mark Zuckerberg) or celebrities \nand local pop culture icons (for example Israeli singers Eyal Golan or Netta \nBarzilai). In addition, the use of a wide variety of graphic elements, fake \nstatistics, and fabricated testimonials strengthens the false credibility of the \nvideos and makes it more difficult for viewers to detect the scam.\nAlgorithmic Scams:  Social Media and Artificial Intelligence as Instruments of Financial Fraud",
+      "metadata": {
+        "text": "10\nfamiliar figures for their own benefit. For example, the fraudsters manipulate \nthe presenters’ facial expressions and lip movements using AI tools to match \nthe content and marketing messages promoting the scheme, persuading the \ntarget audience to invest in it or purchase it. The goal is to create content \nthat appears as real and credible as possible and grounded in reality, so that \nit seems as if the featured individual is truly endorsing the fake investment \nor product with their own voice — something that might appear plausible to \nthe targeted audience.\nTo increase the effectiveness of the fraudulent promotional videos, each video \nis carefully tailored to different target audiences. Thus, the fraudsters produce \ndozens of different versions of the fraudulent video featuring various famous \n\"presenters,” so that the ads are personally customized to different target \npopulation groups based on their interests and preferences. The fraudsters \nprecisely match the presenters, language, visual style, and marketing messages \nto maximize their appeal to the users. At times, the video content is updated \nin line with trends, events, and current public discourse to create Real Time \nMarketing (RTM), which increases the relevance and effectiveness of the fake \nvideos in the eyes of the victims and makes the forgery harder to detect.\nFor example, novice investors will be shown videos emphasizing quick profits, \nfeaturing a well-known financial figure (such as an investment expert who \nfrequently appears on television or social media) or a politician they support \n(such as the Minister of Finance). Older users will be targeted with videos and \nmessages focusing on financial security and stability featuring trustworthy \nand familiar figures (such as the President of Israel or the Governor of the \nBank of Israel). Younger audiences will be targeted with videos featuring \ntech-related figures (such as Elon Musk or Mark Zuckerberg) or celebrities \nand local pop culture icons (for example Israeli singers Eyal Golan or Netta \nBarzilai). In addition, the use of a wide variety of graphic elements, fake \nstatistics, and fabricated testimonials strengthens the false credibility of the \nvideos and makes it more difficult for viewers to detect the scam.\nAlgorithmic Scams:  Social Media and Artificial Intelligence as Instruments of Financial Fraud",
+        "source_uri": "gs://centef-rag-bucket/data/Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud.pdf",
+        "page": 10.0,
+        "type": "page_text",
+        "extractor": "pymupdf"
+      }
+    },
+    {
+      "id": "Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud_page_23",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud.pdf",
+      "text": "23\nFailure to Act on Reports on Fraud Schemes Promoted via Platforms\n  Removal of a Single Ad Without Addressing the Fraud System\nIn most cases, even when a fraudulent ad is reported and effectively \nremoved, similar ads by the same fraud perpetrator continue to appear \non other pages without disruption.\n  Lack of Sanctions Against Pages that Operate Fraud Schemes\nEven when a page publishes fraudulent content, it is not blocked or \nremoved, allowing it to continue launching new ads in the future and to \nreplicate the content unhindered.\n  Preservation of the Fraudsters’ Digital Infrastructure\nWithout sufficient enforcement, the same actors can continue to use \nthe same pages, profiles, and advertising systems repeatedly, without \nneeding to establish new infrastructure.\nFailures in Reporting Mechanisms for Impersonation and Fake Content\n  Ineffective Reporting Mechanisms\nPlatform users lack advanced and effective tools for reporting content \nviolating platform policy, and surveys by ISOC-IL in recent years show \nthat many users tend not to report abuse and threats they experience \non the platforms due to a lack of trust in platform willingness to take \naction2. In many cases, there is also no structured mechanism or option \nto report scams that are promoted through sponsored content or the \nads associated with them.\n2.   Survey on Internet Safety in Israel: Analysis and Trends of Violent Discourse, Online Harm, and Responses \n(2024–2025) – www.isoc.org.il/sts-data/isoc-il-survey-2025-online-violence-and-safety\nAlgorithmic Scams:  Social Media and Artificial Intelligence as Instruments of Financial Fraud",
+      "metadata": {
+        "text": "23\nFailure to Act on Reports on Fraud Schemes Promoted via Platforms\n  Removal of a Single Ad Without Addressing the Fraud System\nIn most cases, even when a fraudulent ad is reported and effectively \nremoved, similar ads by the same fraud perpetrator continue to appear \non other pages without disruption.\n  Lack of Sanctions Against Pages that Operate Fraud Schemes\nEven when a page publishes fraudulent content, it is not blocked or \nremoved, allowing it to continue launching new ads in the future and to \nreplicate the content unhindered.\n  Preservation of the Fraudsters’ Digital Infrastructure\nWithout sufficient enforcement, the same actors can continue to use \nthe same pages, profiles, and advertising systems repeatedly, without \nneeding to establish new infrastructure.\nFailures in Reporting Mechanisms for Impersonation and Fake Content\n  Ineffective Reporting Mechanisms\nPlatform users lack advanced and effective tools for reporting content \nviolating platform policy, and surveys by ISOC-IL in recent years show \nthat many users tend not to report abuse and threats they experience \non the platforms due to a lack of trust in platform willingness to take \naction2. In many cases, there is also no structured mechanism or option \nto report scams that are promoted through sponsored content or the \nads associated with them.\n2.   Survey on Internet Safety in Israel: Analysis and Trends of Violent Discourse, Online Harm, and Responses \n(2024–2025) – www.isoc.org.il/sts-data/isoc-il-survey-2025-online-violence-and-safety\nAlgorithmic Scams:  Social Media and Artificial Intelligence as Instruments of Financial Fraud",
+        "source_uri": "gs://centef-rag-bucket/data/Algorithmic_Scams_How_AI_and_Social_Media_Enable_Financial_Fraud.pdf",
+        "page": 23.0,
+        "type": "page_text",
+        "extractor": "pymupdf"
+      }
+    },
+    {
+      "id": "Syria_Finances_Round_Table_Recording_Jan_8_2025_chunk_121",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+      "text": "Is there a way to Transfer data And value And money Intra Syria Was there a chance In Bachar's time But now is there a chance To create a fintech company Maybe to import something From De Gaulle So those are my questions And I invite Each of you to Maybe add one more Big question To the questions We should be asking And then we'll wrap it up Yeah, I'll jump in real quick I mean for me I think",
+      "metadata": {
+        "text": "Is there a way to Transfer data And value And money Intra Syria Was there a chance In Bachar's time But now is there a chance To create a fintech company Maybe to import something From De Gaulle So those are my questions And I invite Each of you to Maybe add one more Big question To the questions We should be asking And then we'll wrap it up Yeah, I'll jump in real quick I mean for me I think",
+        "type": "subtitle_chunk",
+        "duration_sec": 30.0,
+        "end_sec": 3544.0,
+        "source_uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+        "start_sec": 3514.0,
+        "segment_count": 22.0,
+        "extractor": "srt_parser"
+      }
+    },
+    {
+      "id": "Syria_Finances_Round_Table_Recording_Jan_8_2025_chunk_51",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+      "text": "Right? Informal networks That served Particularly diaspora communities Looking to send money Back into the country That's also Should be noted How money was leaving the country We've seen in the last few days New records Making even more clear That Assad was smuggling Physical cash On planes to Moscow For the last couple of years So a couple of days ago OFAC issued What was called General License 24 Which had three primary components So for six months It authorized transactions",
+      "metadata": {
+        "text": "Right? Informal networks That served Particularly diaspora communities Looking to send money Back into the country That's also Should be noted How money was leaving the country We've seen in the last few days New records Making even more clear That Assad was smuggling Physical cash On planes to Moscow For the last couple of years So a couple of days ago OFAC issued What was called General License 24 Which had three primary components So for six months It authorized transactions",
+        "type": "subtitle_chunk",
+        "duration_sec": 30.0,
+        "end_sec": 1480.0,
+        "source_uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+        "start_sec": 1450.0,
+        "extractor": "srt_parser",
+        "segment_count": 23.0
+      }
+    },
+    {
+      "id": "Syria_Finances_Round_Table_Recording_Jan_8_2025_chunk_49",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+      "text": "By the United States You could send money Through US Or third party Or third country NGOs But you couldn't send money To Syrian NGOs Unless you had a specific license To do so So if this all sounds Extremely complicated It is And so it's no wonder Getting funds into Syria Through formal channels Was all but impossible There was a 2018 study That estimated A third of all funds Destined for Syria Were being held In a state of limbo You know Anecdotally",
+      "metadata": {
+        "text": "By the United States You could send money Through US Or third party Or third country NGOs But you couldn't send money To Syrian NGOs Unless you had a specific license To do so So if this all sounds Extremely complicated It is And so it's no wonder Getting funds into Syria Through formal channels Was all but impossible There was a 2018 study That estimated A third of all funds Destined for Syria Were being held In a state of limbo You know Anecdotally",
+        "type": "subtitle_chunk",
+        "duration_sec": 30.0,
+        "end_sec": 1420.0,
+        "source_uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+        "start_sec": 1390.0,
+        "segment_count": 24.0,
+        "extractor": "srt_parser"
+      }
+    },
+    {
+      "id": "Syria_Finances_Round_Table_Recording_Jan_8_2025_chunk_60",
+      "title": "",
+      "uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+      "text": "And I incur Both a fine And negative publicity Is too great For me to be willing To allow a couple of NGOs To send A little bit of money To Syria That's going to generate Negligible revenue So I'll pause there for a minute To go on forever But hopefully helpful context For where we stand To understand Thank you very much Thank you very much Guys Jay or Michal Do you comments On Michael's Brief",
+      "metadata": {
+        "text": "And I incur Both a fine And negative publicity Is too great For me to be willing To allow a couple of NGOs To send A little bit of money To Syria That's going to generate Negligible revenue So I'll pause there for a minute To go on forever But hopefully helpful context For where we stand To understand Thank you very much Thank you very much Guys Jay or Michal Do you comments On Michael's Brief",
+        "type": "subtitle_chunk",
+        "duration_sec": 28.0,
+        "end_sec": 1746.0,
+        "source_uri": "gs://centef-rag-bucket/data/Syria Finances Round Table Recording Jan 8 2025.srt",
+        "start_sec": 1718.0,
+        "extractor": "srt_parser",
+        "segment_count": 23.0
+      }
+    }
+  ],
+  "prompt": null
+}
