@@ -19,7 +19,7 @@ from datetime import datetime
 
 from google.cloud import storage
 import vertexai
-from vertexai.generative_models import GenerativeModel
+from vertexai.preview.generative_models import GenerativeModel
 
 
 # ========= ENV =========
@@ -38,7 +38,7 @@ CHUNKS_BUCKET = env("TARGET_BUCKET", "centef-rag-chunks").replace("gs://", "").s
 # New bucket for summaries (or can use same bucket with different prefix)
 SUMMARIES_BUCKET = env("SUMMARIES_BUCKET", CHUNKS_BUCKET).replace("gs://", "").strip("/")
 
-SUMMARY_MODEL = os.environ.get("SUMMARY_MODEL", "gemini-1.5-pro-002")
+SUMMARY_MODEL = os.environ.get("SUMMARY_MODEL", "gemini-2.5-flash")
 # =======================
 
 

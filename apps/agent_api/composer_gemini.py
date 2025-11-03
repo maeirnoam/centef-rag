@@ -1,3 +1,8 @@
+"""
+Legacy composer - kept for backwards compatibility.
+For new implementations, use synthesizer.py instead.
+"""
+
 from __future__ import annotations
 from typing import List, Dict, Any
 import os
@@ -9,18 +14,26 @@ except Exception:  # pragma: no cover
     vertexai = None
 
 
-MODEL_NAME = os.environ.get("GENERATION_MODEL", "gemini-1.5-pro")
+MODEL_NAME = os.environ.get("GENERATION_MODEL", "gemini-2.0-flash-exp")
 LOCATION = os.environ.get("VERTEX_LOCATION", "us-central1")
-PROJECT = os.environ.get("GCP_PROJECT")
+PROJECT = os.environ.get("GCP_PROJECT") or os.environ.get("PROJECT_ID")
 
 
 def _ensure_vertex():
     if vertexai is None:
         raise RuntimeError("vertexai library not installed")
+    if PROJECT is None:
+        raise RuntimeError("GCP_PROJECT or PROJECT_ID environment variable not set")
     vertexai.init(project=PROJECT, location=LOCATION)
 
 
 def build_prompt(question: str, contexts: List[Dict[str, Any]]) -> str:
+    """
+    Build a simple prompt for answer generation.
+    
+    Note: This is the legacy approach. For better results with two-tier
+    retrieval, use synthesizer.py which handles summaries and chunks separately.
+    """
     lines = [
         "You are a helpful assistant. Answer the question using the provided context only.",
         "Cite each statement with anchors (page x) or [start-end sec] for AV when possible.",
@@ -41,6 +54,12 @@ def build_prompt(question: str, contexts: List[Dict[str, Any]]) -> str:
 
 
 def generate_answer(question: str, contexts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Generate an answer from contexts.
+    
+    Note: This is the legacy approach. For better results with two-tier
+    retrieval, use synthesizer.synthesize_answer() instead.
+    """
     _ensure_vertex()
     prompt = build_prompt(question, contexts)
     model = GenerativeModel(MODEL_NAME)
